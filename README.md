@@ -1,5 +1,3 @@
-# Plataforma de Créditos
-
 ## Pasos para correr localmente
 
 1. Clonar el repositorio
@@ -22,4 +20,4 @@
 ## URLs
 
 - GitHub: https://github.com/SandraPanez/PlataformaCreditos
-- Render: (pendiente)
+- Render: https://plataformacreditos-y2dy.onrender.com
