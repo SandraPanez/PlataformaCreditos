@@ -1,0 +1,68 @@
+@model List<PlataformaCreditos.Models.SolicitudCredito>
+@{
+    ViewData["Title"] = "Panel Analista";
+}
+
+<h2>Panel de Analista</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success">@TempData["Exito"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No hay solicitudes pendientes.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Monto</th>
+                <th>Ingresos</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.Id</td>
+                    <td>@(((Dictionary<string, string?>)ViewBag.Usuarios)[s.Cliente!.UsuarioId])</td>
+                    <td>S/. @s.MontoSolicitado</td>
+                    <td>S/. @s.Cliente?.IngresosMensuales</td>
+                    <td>@s.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <form method="post" action="/Analista/Aprobar/@s.Id" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                        </form>
+
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="collapse" 
+                                data-bs-target="#rechazar-@s.Id">Rechazar</button>
+
+                        <div class="collapse mt-2" id="rechazar-@s.Id">
+                            <form method="post" action="/Analista/Rechazar/@s.Id">
+                                @Html.AntiForgeryToken()
+                                <div class="input-group">
+                                    <input type="text" name="motivoRechazo" class="form-control" 
+                                           placeholder="Motivo de rechazo" required />
+                                    <button type="submit" class="btn btn-danger">Confirmar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
