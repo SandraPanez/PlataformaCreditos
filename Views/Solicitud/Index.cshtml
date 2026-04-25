@@ -1,0 +1,88 @@
+@model List<PlataformaCreditos.Models.SolicitudCredito>
+@{
+    ViewData["Title"] = "Mis Solicitudes";
+}
+
+<h2>Mis Solicitudes</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <label class="form-label">Estado</label>
+        <select name="estado" class="form-select">
+            <option value="">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Aprobado">Aprobado</option>
+            <option value="Rechazado">Rechazado</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Monto Mín</label>
+        <input type="number" name="montoMin" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Monto Máx</label>
+        <input type="number" name="montoMax" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Fecha Inicio</label>
+        <input type="date" name="fechaInicio" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Fecha Fin</label>
+        <input type="date" name="fechaFin" class="form-control" />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+</form>
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">@ViewBag.Mensaje</div>
+}
+else if (!Model.Any())
+{
+    <div class="alert alert-info">No tienes solicitudes registradas.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.Id</td>
+                    <td>S/. @s.MontoSolicitado</td>
+                    <td>@s.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <span class="badge @(s.Estado == PlataformaCreditos.Models.EstadoSolicitud.Aprobado ? "bg-success" : s.Estado == PlataformaCreditos.Models.EstadoSolicitud.Rechazado ? "bg-danger" : "bg-warning")">
+                            @s.Estado
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/Solicitud/Detalle/@s.Id" class="btn btn-sm btn-info">Ver detalle</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
