@@ -18,14 +18,21 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.AddControllersWithViews();
 
-// Redis
-var redisConnection = builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379";
-
-builder.Services.AddStackExchangeRedisCache(options =>
+// Redis (solo en producción, en desarrollo usamos memoria)
+if (builder.Environment.IsProduction())
 {
-    options.Configuration = redisConnection;
-    options.InstanceName = "PlataformaCreditos_";
-});
+    var redisConnection = builder.Configuration["Redis:ConnectionString"]
+        ?? throw new InvalidOperationException("Redis connection string not found.");
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "PlataformaCreditos_";
+    });
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 builder.Services.AddSession(options =>
 {
@@ -46,7 +53,6 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
