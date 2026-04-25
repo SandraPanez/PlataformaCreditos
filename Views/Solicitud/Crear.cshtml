@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Nueva Solicitud";
+}
+
+<h2>Registrar Nueva Solicitud</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+@if (ViewBag.Exito != null)
+{
+    <div class="alert alert-success">@ViewBag.Exito</div>
+}
+
+@if (ViewBag.Error == null || ViewBag.Exito != null)
+{
+    <form method="post" action="/Solicitud/Crear">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label">Monto Solicitado (S/.)</label>
+            <input type="number" name="montoSolicitado" class="form-control" 
+                   min="0.01" step="0.01" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Registrar Solicitud</button>
+        <a href="/Solicitud/Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+}

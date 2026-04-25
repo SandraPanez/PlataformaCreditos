@@ -78,4 +78,88 @@ public class SolicitudController : Controller
 
         return View(solicitud);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Crear()
+    {
+        var userId = _userManager.GetUserId(User);
+        var cliente = await _db.Clientes.FirstOrDefaultAsync(c => c.UsuarioId == userId);
+
+        if (cliente == null)
+        {
+            ViewBag.Error = "No tienes un perfil de cliente registrado.";
+            return View();
+        }
+
+        if (!cliente.Activo)
+        {
+            ViewBag.Error = "Tu cuenta de cliente está inactiva.";
+            return View();
+        }
+
+        var tienePendiente = await _db.SolicitudesCredito
+            .AnyAsync(s => s.ClienteId == cliente.Id && s.Estado == EstadoSolicitud.Pendiente);
+
+        if (tienePendiente)
+        {
+            ViewBag.Error = "Ya tienes una solicitud en estado Pendiente.";
+            return View();
+        }
+
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Crear(decimal montoSolicitado)
+    {
+        var userId = _userManager.GetUserId(User);
+        var cliente = await _db.Clientes.FirstOrDefaultAsync(c => c.UsuarioId == userId);
+
+        if (cliente == null)
+        {
+            ViewBag.Error = "No tienes un perfil de cliente registrado.";
+            return View();
+        }
+
+        if (!cliente.Activo)
+        {
+            ViewBag.Error = "Tu cuenta de cliente está inactiva.";
+            return View();
+        }
+
+        if (montoSolicitado <= 0)
+        {
+            ViewBag.Error = "El monto debe ser mayor a 0.";
+            return View();
+        }
+
+        if (montoSolicitado > cliente.IngresosMensuales * 10)
+        {
+            ViewBag.Error = $"El monto no puede superar 10 veces tus ingresos mensuales (máx: S/. {cliente.IngresosMensuales * 10}).";
+            return View();
+        }
+
+        var tienePendiente = await _db.SolicitudesCredito
+            .AnyAsync(s => s.ClienteId == cliente.Id && s.Estado == EstadoSolicitud.Pendiente);
+
+        if (tienePendiente)
+        {
+            ViewBag.Error = "Ya tienes una solicitud en estado Pendiente.";
+            return View();
+        }
+
+        var solicitud = new SolicitudCredito
+        {
+            ClienteId = cliente.Id,
+            MontoSolicitado = montoSolicitado,
+            FechaSolicitud = DateTime.Now,
+            Estado = EstadoSolicitud.Pendiente
+        };
+
+        _db.SolicitudesCredito.Add(solicitud);
+        await _db.SaveChangesAsync();
+
+        ViewBag.Exito = "¡Solicitud registrada exitosamente!";
+        return View();
+    }
 }
